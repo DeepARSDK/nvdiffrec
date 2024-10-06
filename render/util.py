@@ -183,6 +183,40 @@ def fovx_to_fovy(fovx, aspect):
 def focal_length_to_fovy(focal_length, sensor_height):
     return 2 * np.arctan(0.5 * sensor_height / focal_length)
 
+
+def view_plane(camd, winx, winy, xasp, yasp):
+    ycor = yasp / xasp
+
+    sensor_size = camd.sensor_width
+    pixsize = (sensor_size * camd.clipt_start) / camd.lens # focal length in milimeters
+
+    viewfac = winx
+    pixsize /= viewfac
+
+    xmin = -0.5 * winx
+    ymin = -0.5 * ycor * winy
+    xmax =  0.5 * winx
+    ymax =  0.5 * ycor * winy
+
+    #/* lens shift and offset */
+    dx = camd.shift_x * viewfac # + winx * params->offsetx
+    dy = camd.shift_y * viewfac # + winy * params->offsety
+
+    xmin += dx
+    ymin += dy
+    xmax += dx
+    ymax += dy
+
+    #/* the window matrix is used for clipping, and not changed during OSA steps */
+    #/* using an offset of +0.5 here would give clip errors on edges */
+    xmin *= pixsize
+    xmax *= pixsize
+    ymin *= pixsize
+    ymax *= pixsize
+
+    return xmin, xmax, ymin, ymax
+
+
 # Reworked so this matches gluPerspective / glm::perspective, using fovy
 def perspective(fovy=0.7854, aspect=1.0, n=0.1, f=1000.0, device=None):
     y = np.tan(fovy / 2)
@@ -192,7 +226,14 @@ def perspective(fovy=0.7854, aspect=1.0, n=0.1, f=1000.0, device=None):
                          [           0,    0,           -1,              0]], dtype=torch.float32, device=device)
 
 # Reworked so this matches gluPerspective / glm::perspective, using fovy
-def perspective_offcenter(fovy, fraction, rx, ry, aspect=1.0, n=0.1, f=1000.0, device=None):
+def pinhole_perspective(f, cx=0.0, cy=0.0, device=None):
+    return torch.tensor([[  f,    0,    cx,     0],
+                         [  0,    f,    cy,     0],
+                         [  0,    0,     1,     0],
+                         [  0,    0,     0,     1]], dtype=torch.float32, device=device)
+
+# Reworked so this matches gluPerspective / glm::perspective, using fovy
+def perspective_offcenter(fovy, fractionx, fractiony, rx, ry, aspect=1.0, n=0.1, f=1000.0, device=None):
     y = np.tan(fovy / 2)
 
     # Full frustum
@@ -200,8 +241,8 @@ def perspective_offcenter(fovy, fraction, rx, ry, aspect=1.0, n=0.1, f=1000.0, d
     T, B = y, -y
 
     # Create a randomized sub-frustum
-    width  = (R-L)*fraction
-    height = (T-B)*fraction
+    width  = (R-L)*fractionx
+    height = (T-B)*fractiony
     xstart = (R-L)*rx
     ystart = (T-B)*ry
 
@@ -234,6 +275,13 @@ def rotate_y(a, device=None):
     return torch.tensor([[ c, 0, s, 0], 
                          [ 0, 1, 0, 0], 
                          [-s, 0, c, 0], 
+                         [ 0, 0, 0, 1]], dtype=torch.float32, device=device)
+
+def rotate_z(a, device=None):
+    s, c = np.sin(a), np.cos(a)
+    return torch.tensor([[ c,-s, 0, 0],
+                         [ s, c, 0, 0],
+                         [ 0, 0, 1, 0],
                          [ 0, 0, 0, 1]], dtype=torch.float32, device=device)
 
 def scale(s, device=None):

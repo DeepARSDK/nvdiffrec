@@ -48,6 +48,7 @@ def bsdf_prepare_shading_normal(pos, view_pos, perturbed_nrm, smooth_nrm, smooth
     smooth_tng = _safe_normalize(smooth_tng)
     view_vec   = _safe_normalize(view_pos - pos)
     shading_nrm = _perturb_normal(perturbed_nrm, smooth_nrm, smooth_tng, opengl)
+    return shading_nrm
     return _bend_normal(view_vec, shading_nrm, geom_nrm, two_sided_shading)
 
 ################################################################################

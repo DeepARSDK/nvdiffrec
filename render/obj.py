@@ -105,6 +105,8 @@ def load_obj(filename, clear_ks=True, mtl_override=None):
     assert len(tfaces) == len(faces) and len(nfaces) == len (faces)
 
     # Create an "uber" material by combining all textures into a larger texture
+    if mtl_override is not None:
+        used_materials = [all_materials[1]]     # Ovo sam ja dodao da se loada materijal koji sam stavio u FLAGS.mtl_override
     if len(used_materials) > 1:
         uber_material, texcoords, tfaces = material.merge_materials(used_materials, texcoords, tfaces, mfaces)
     else:
@@ -142,18 +144,21 @@ def write_obj(folder, mesh, save_material=True):
         print("    writing %d vertices" % len(v_pos))
         for v in v_pos:
             f.write('v {} {} {} \n'.format(v[0], v[1], v[2]))
-       
+            break
+
         if v_tex is not None:
             print("    writing %d texcoords" % len(v_tex))
             assert(len(t_pos_idx) == len(t_tex_idx))
             for v in v_tex:
                 f.write('vt {} {} \n'.format(v[0], 1.0 - v[1]))
+                break
 
         if v_nrm is not None:
             print("    writing %d normals" % len(v_nrm))
             assert(len(t_pos_idx) == len(t_nrm_idx))
             for v in v_nrm:
                 f.write('vn {} {} {}\n'.format(v[0], v[1], v[2]))
+                break
 
         # faces
         f.write("s 1 \n")
@@ -167,6 +172,7 @@ def write_obj(folder, mesh, save_material=True):
             for j in range(3):
                 f.write(' %s/%s/%s' % (str(t_pos_idx[i][j]+1), '' if v_tex is None else str(t_tex_idx[i][j]+1), '' if v_nrm is None else str(t_nrm_idx[i][j]+1)))
             f.write("\n")
+            break
 
     if save_material:
         mtl_file = os.path.join(folder, 'mesh.mtl')

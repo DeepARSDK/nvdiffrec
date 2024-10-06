@@ -76,14 +76,27 @@ def load_mtl(fn, clear_ks=True):
             mat['bsdf'] = 'pbr'
 
         if 'map_kd' in mat:
-            mat['kd'] = texture.load_texture2D(os.path.join(mtl_path, mat['map_kd']))
+            mat['kd'] = texture.load_texture2D(os.path.join(mtl_path, mat['map_kd']), channels=3)
         else:
-            mat['kd'] = texture.Texture2D(mat['kd'])
-        
+            if 'kd' in mat:
+                mat['kd'] = texture.Texture2D(mat['kd'])
+            else:
+                mat['kd'] = texture.Texture2D(torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32, device='cuda'))
+
         if 'map_ks' in mat:
-            mat['ks'] = texture.load_texture2D(os.path.join(mtl_path, mat['map_ks']), channels=3)
+            # mat['ks'] = texture.load_texture2D(os.path.join(mtl_path, mat['map_ks']), channels=3)
+            roughness = torch.tensor(util.load_image(os.path.join(mtl_path, mat['map_ks'])), dtype=torch.float32)
+            N = roughness.shape[0]
+            print(roughness.shape)
+            ks_tensor = torch.zeros((N, N, 3), dtype=torch.float32, device='cuda')
+            ks_tensor[:, :, 1] = roughness
+            mat['ks'] = texture.Texture2D(ks_tensor)
+
         else:
-            mat['ks'] = texture.Texture2D(mat['ks'])
+            if 'ks' in mat:
+                mat['ks'] = texture.Texture2D(mat['ks'])
+            else:
+                mat['ks'] = texture.Texture2D(torch.tensor([0.0, 0.0, 0.0], dtype=torch.float32, device='cuda'))
 
         if 'bump' in mat:
             mat['normal'] = texture.load_texture2D(os.path.join(mtl_path, mat['bump']), lambda_fn=lambda x: x * 2 - 1, channels=3)

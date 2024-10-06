@@ -67,6 +67,7 @@ def shade(
         perturbed_nrm = None
 
     gb_normal = ru.prepare_shading_normal(gb_pos, view_pos, perturbed_nrm, gb_normal, gb_tangent, gb_geometric_normal, two_sided_shading=True, opengl=True)
+    # gb_normal = perturbed_nrm
 
     ################################################################################
     # Evaluate BSDF

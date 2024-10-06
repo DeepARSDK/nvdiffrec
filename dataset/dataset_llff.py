@@ -60,7 +60,7 @@ class DatasetLLFF(Dataset):
 
         # Recenter scene so lookat position is origin
         center                = util.lines_focal(self.imvs[..., :3, 3], -self.imvs[..., :3, 2])
-        self.imvs[..., :3, 3] = self.imvs[..., :3, 3] - center[None, ...]
+        # self.imvs[..., :3, 3] = self.imvs[..., :3, 3] - center[None, ...]
 
         if self.FLAGS.local_rank == 0:
             print("DatasetLLFF: %d images with shape [%d, %d]" % (len(all_img), self.resolution[0], self.resolution[1]))
