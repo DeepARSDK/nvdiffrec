@@ -1,0 +1,18 @@
+{
+    "ref_mesh": "data/adidas_campus",
+    "base_mesh": "data/adidas_campus/obj/model.obj",
+    "random_textures": true,
+    "iter": 5000,
+    "save_interval": 500,
+    "texture_res": [ 2048, 2048 ],
+    "train_res": [1334, 2000],
+    "batch": 1,
+    "learning_rate": [0.01],
+    "kd_min" : [0, 0, 0],
+    "kd_max" : [1.0, 1.0, 1.0],
+    "ks_min" : [0, 0.2, 0],
+    "lock_pos": true,
+    "background" : "white",
+    "display" : [{"bsdf":"kd"}, {"bsdf":"ks"}, {"bsdf" : "normal"}, {"latlong": true}],
+    "out_dir": "adidas_campus_meshpass"
+}

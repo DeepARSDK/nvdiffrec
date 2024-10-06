@@ -1,0 +1,19 @@
+{
+    "ref_mesh": "data/flexi",
+    "random_textures": true,
+    "iter": 5000,
+    "save_interval": 500,
+    "texture_res": [ 2048, 2048 ],
+    "train_res": [933, 1400],
+    "batch": 1,
+    "learning_rate": [0.001, 0.001],
+    "dmtet_grid" : 128,
+    "mesh_scale" : 1.0,
+    "kd_min" : [0, 0, 0],
+    "kd_max" : [1.0, 1.0, 1.0],
+    "ks_min" : [0, 0, 0],
+    "ks_max" : [0.0, 1.0, 1.0],
+    "background" : "black",
+    "display" : [{"bsdf":"kd"}, {"bsdf":"ks"}, {"bsdf" : "normal"}],
+    "out_dir": "flexi_2stage_ks_limit"
+}
